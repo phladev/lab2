@@ -11,9 +11,7 @@ typedef struct conjunto {
 } Conjunto;
 
 int conjuntoVazio(Conjunto *conjunto) {
-  if(conjunto != NULL) {
-    return conjunto->tamanho == 0;
-  }
+  return (conjunto == NULL || conjunto->tamanho == 0);
 }
 
 void imprimeConjunto(Conjunto *conjunto) {
@@ -42,10 +40,21 @@ int removeUltimo(Conjunto *conjunto) {
 }
 
 void adicionarValor(Conjunto *conjunto, int valor) {
-  if(conjunto != NULL && conjunto->tamanho <= conjunto->max) {
+  if(conjunto != NULL && conjunto->tamanho < conjunto->max) {
     conjunto->valores[conjunto->tamanho] = valor;
     conjunto->tamanho++;
   }
+}
+
+int numeroEstaPresente(Conjunto *conjunto, int numero) {
+  if(conjunto != NULL && !conjuntoVazio(conjunto)) {
+    for(int i = 0; i < conjunto->tamanho; i++) {
+      if(conjunto->valores[i] == numero) {
+        return 1;
+      }
+    }
+  }
+  return 0;
 }
 
 Conjunto* intersecaoConjuntos(Conjunto *con1, Conjunto *con2) {
@@ -56,12 +65,10 @@ Conjunto* intersecaoConjuntos(Conjunto *con1, Conjunto *con2) {
   intersecao->max = con1->max < con2->max ? con1->max : con2->max;
   intersecao->tamanho = 0;
   intersecao->valores = (int*)malloc(intersecao->max * sizeof(int));
-  for(int i = 0; i < con1->tamanho; i++) {
-    for(int j = 0; j < con2->tamanho; j++) {
-      if(con1->valores[i] == con2->valores[j]) {
-        intersecao->valores[intersecao->tamanho] = con1->valores[i];
-        intersecao->tamanho++;
-      }
+  for (int i = 0; i < con1->tamanho; i++) {
+    if (numeroEstaPresente(con2, con1->valores[i]) &&
+        !numeroEstaPresente(intersecao, con1->valores[i])) {
+      intersecao->valores[intersecao->tamanho++] = con1->valores[i];
     }
   }
 
@@ -69,43 +76,43 @@ Conjunto* intersecaoConjuntos(Conjunto *con1, Conjunto *con2) {
 }
 
 Conjunto* diferencaConjuntos(Conjunto *con1, Conjunto *con2) {
-  if(con1 == NULL || con2 == NULL) {
+  if (con1 == NULL || con2 == NULL) {
     return NULL;
   }
   Conjunto *diferenca = (Conjunto*)malloc(sizeof(Conjunto));
-  diferenca->max = con1->max;
+  diferenca->max = con1->max + con2->max;
   diferenca->tamanho = 0;
   diferenca->valores = (int*)malloc(diferenca->max * sizeof(int));
-  for(int i = 0; i < con1->tamanho; i++) {
+
+  for (int i = 0; i < con1->tamanho; i++) {
     int encontrado = 0;
-    for(int j = 0; j < con2->tamanho; j++) {
-      if(con1->valores[i] == con2->valores[j]) {
+    for (int j = 0; j < con2->tamanho; j++) {
+      if (con1->valores[i] == con2->valores[j]) {
         encontrado = 1;
         break;
       }
     }
-    if(!encontrado) {
-      diferenca->valores[diferenca->tamanho] = con1->valores[i];
-      diferenca->tamanho++;
+    if (!encontrado && !numeroEstaPresente(diferenca, con1->valores[i])) {
+      diferenca->valores[diferenca->tamanho++] = con1->valores[i];
     }
   }
 
-  for(int i = 0; i < con2->tamanho; i++) {
+  for (int i = 0; i < con2->tamanho; i++) {
     int encontrado = 0;
-    for(int j = 0; j < con1->tamanho; j++) {
-      if(con2->valores[i] == con1->valores[j]) {
+    for (int j = 0; j < con1->tamanho; j++) {
+      if (con2->valores[i] == con1->valores[j]) {
         encontrado = 1;
         break;
       }
     }
-    if(!encontrado) {
-      diferenca->valores[diferenca->tamanho] = con2->valores[i];
-      diferenca->tamanho++;
+    if (!encontrado && !numeroEstaPresente(diferenca, con2->valores[i])) {
+      diferenca->valores[diferenca->tamanho++] = con2->valores[i];
     }
   }
 
   return diferenca;
 }
+
 
 Conjunto* uniaoConjuntos(Conjunto *con1, Conjunto *con2) {
   if(con1 == NULL || con2 == NULL) {
@@ -113,18 +120,21 @@ Conjunto* uniaoConjuntos(Conjunto *con1, Conjunto *con2) {
   }
   Conjunto *uniao = (Conjunto*)malloc(sizeof(Conjunto));
   uniao->max = con1->max + con2->max;
-  uniao->tamanho = con1->tamanho + con2->tamanho;
+  uniao->tamanho = 0;
   uniao->valores = (int*)malloc(uniao->max * sizeof(int));
   for(int i = 0; i < con1->tamanho; i++) {
-    uniao->valores[i] = con1->valores[i];
+    if(!numeroEstaPresente(uniao, con1->valores[i])) {
+      uniao->valores[uniao->tamanho++] = con1->valores[i];
+    }
   }
   for(int i = 0; i < con2->tamanho; i++) {
-    uniao->valores[con1->tamanho + i] = con2->valores[i];
+    if(!numeroEstaPresente(uniao, con2->valores[i])) {
+      uniao->valores[uniao->tamanho++] = con2->valores[i];
+    }
   }
 
   return uniao;
 }
-
 
 
 int tamanhoConjunto(Conjunto *conjunto) {
@@ -158,17 +168,6 @@ int menorValor(Conjunto *conjunto) {
     return menor;
   }
   return -1;
-}
-
-int numeroEstaPresente(Conjunto *conjunto, int numero) {
-  if(conjunto != NULL && !conjuntoVazio(conjunto)) {
-    for(int i = 0; i < conjunto->tamanho; i++) {
-      if(conjunto->valores[i] == numero) {
-        return 1;
-      }
-    }
-  }
-  return 0;
 }
 
 int conjuntosSaoIguais(Conjunto *con1, Conjunto *con2) {
