@@ -1,12 +1,13 @@
-#ifndef LISTASE_H
-#define LISTASE_H
+#ifndef LDE_H
+#define LDE_H
 
 #include <stdio.h>
 #include <stdlib.h>
 
 typedef struct NO{
   int info;
-  struct NO* prox;    
+  struct NO* prox;
+  struct NO* ant;
 }NO;
 
 typedef struct NO* Lista;
@@ -22,8 +23,8 @@ Lista* criaLista(){
 
 int listaVazia(Lista *li){
   if(li == NULL) return 1;
-  if(*li == NULL) return 1;
-  return 0;
+  if(*li == NULL) return 1;//True - Vazia!
+  return 0;//False - tem elemento!
 }
 
 NO* alocarNO(){
@@ -40,6 +41,9 @@ int insereIni(Lista* li, int elem){
   if(novo == NULL) return 0;
   novo->info = elem;
   novo->prox = *li;
+  novo->ant = NULL;
+  if(!listaVazia(li))
+    (*li)->ant = novo;
   *li = novo;
   return 1;
 }
@@ -51,37 +55,39 @@ int insereFim(Lista* li, int elem){
   novo->info = elem;
   novo->prox = NULL;
   if(listaVazia(li)){
+    novo->ant = NULL;
     *li = novo;
   }else{
     NO* aux = *li;
     while(aux->prox != NULL)
       aux = aux->prox;
     aux->prox = novo;
+    novo->ant = aux;
   }
   return 1;
 }
 
-int removeIni(Lista* li){
+int removeIni(Lista *li){
   if(li == NULL) return 0;
   if(listaVazia(li)) return 0;
   NO* aux = *li;
   *li = aux->prox;
+  if(aux->prox != NULL)
+    aux->prox->ant = NULL;
   liberarNO(aux);
   return 1;
 }
 
-int removeFim(Lista* li){
+int removeFim(Lista *li){
   if(li == NULL) return 0;
   if(listaVazia(li)) return 0;
-  NO* ant, *aux = *li;
-  while(aux->prox != NULL){
-    ant = aux;
+  NO* aux = *li;
+  while(aux->prox != NULL)
     aux = aux->prox;
-  }
-  if(aux == *li)
+  if(aux->ant == NULL)
     *li = aux->prox;
-  else   
-    ant->prox = aux->prox;
+  else
+    aux->ant->prox = NULL;
   liberarNO(aux);
   return 1;
 }
@@ -101,60 +107,19 @@ void imprimeLista(Lista* li){
   printf("\n");
 }
 
-void recComplementar(NO* n){
-  if(n == NULL) return;
-  recComplementar(n->prox);
-  printf("%d ", n->info);
-}
-
-void imprimeRevRec(Lista *li){
-  if(li == NULL) return;
-  if(listaVazia(li)){
-    printf("Lista Vazia!\n");
-    return;
-  }
-  printf("Elementos:\n");
-  recComplementar(*li);
-  printf("\n");
-
-  //imprimeRevRec(&(*li)->prox);
-  //printf("%d ", (*li)->info);
-}
-
-void imprimeRev(Lista *li){
-  if(li == NULL) return;
-  if(listaVazia(li)){
-    printf("Lista Vazia!\n");
-    return;
-  }
-  printf("Elementos REV:\n");
-  NO* ant, *aux;
-  NO* fim = NULL;
-  do{
-    aux = *li;
-    while(aux != fim){
-      ant = aux;
-      aux = aux->prox;
-    }
-    printf("%d ", ant->info);
-    fim = ant;
-  }while(fim != *li);
-  printf("\n");
-}
-
-int tamanho(Lista *li){
+int tamanho(Lista* li){
   if(li == NULL) return 0;
   if(listaVazia(li)) return 0;
-  int qtd = 0;
+  int cont = 0;
   NO* aux = *li;
   while(aux != NULL){
-    qtd++;
+    cont++;
     aux = aux->prox;
   }
-  return qtd;
+  return cont;
 }
 
-int procura(Lista *li, int x){
+int procura(Lista* li, int x){
   if(li == NULL) return 0;
   if(listaVazia(li)) return 0;
   NO* aux = *li;
@@ -169,42 +134,47 @@ int procura(Lista *li, int x){
 void ordenaLista(Lista* li){
   if(li == NULL) return;
   if(listaVazia(li)) return;
-  NO* i, *j;
+  NO* i = *li;
+  NO* j;
   int temp;
-  for(i = *li; i->prox != NULL; i = i->prox){
-    for(j = i->prox; j != NULL; j = j->prox){
+  while(i != NULL){
+    j = i->prox;
+    while(j != NULL){
       if(i->info > j->info){
         temp = i->info;
         i->info = j->info;
         j->info = temp;
       }
+      j = j->prox;
     }
+    i = i->prox;
   }
 }
 
 void insereOrdenado(Lista* li, int x) {
   if(li == NULL) return;
-  if(listaVazia(li)){
+  if(!listaVazia(li)) {
     insereIni(li, x);
     ordenaLista(li);
+    return;
   }
 }
 
 void removePrimeiroElemento(Lista* li, int x) {
   if(li == NULL) return;
   if(listaVazia(li)) return;
-  NO* ant, *aux = *li;
-  while(aux != NULL){
-    if(aux->info == x){
-      if(aux == *li)
-        removeIni(li);
-      else{
-        ant->prox = aux->prox;
-        liberarNO(aux);
-      }
+  NO* aux = *li;
+  while(aux != NULL) {
+    if(aux->info == x) {
+      if(aux->ant != NULL)
+        aux->ant->prox = aux->prox;
+      else
+        *li = aux->prox;
+      if(aux->prox != NULL)
+        aux->prox->ant = aux->ant;
+      liberarNO(aux);
       return;
     }
-    ant = aux;
     aux = aux->prox;
   }
   printf("Elemento %d não encontrado na lista.\n", x);
@@ -216,11 +186,13 @@ void destroiLista(Lista* li){
     while((*li) != NULL){
       aux = *li;
       *li = (*li)->prox;
+      //printf("Destruindo.. %d\n", aux->info);
       liberarNO(aux);
     }
     free(li);
   }
 }
+
 
 
 #endif

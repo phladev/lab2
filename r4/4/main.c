@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "LSE.h"
+#include "LCSE.h"
 
 int main(){
   Lista *L;
@@ -8,7 +8,7 @@ int main(){
   insereFim(L, 10);
   insereFim(L, 30);
   insereFim(L, 70);
-  insereFim(L, 20);
+  insereFim(L, 25);
   insereFim(L, 40);
   insereFim(L, 50);
   insereFim(L, 60);
@@ -18,14 +18,8 @@ int main(){
   printf("Tamanho lista: %d\n", tamanho(L));
   imprimeLista(L);
 
-  printf("Elemento 10 está na lista? %s\n", procura(L, 10) ? "Sim" : "Não");
-  printf("Elemento 1 está na lista? %s\n", procura(L, 100) ? "Sim" : "Não");
-
-  insereOrdenado(L, 35);
-  imprimeLista(L);
-
-  removePrimeiroElemento(L, 40);
-  imprimeLista(L);
+  printf("Elemento 13 está na lista? %s\n", procura(L, 13) ? "Sim" : "Não");
+  printf("Elemento 25 está na lista? %s\n", procura(L, 25) ? "Sim" : "Não");
 
   destroiLista(L);
   return 0;
