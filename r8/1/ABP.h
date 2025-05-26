@@ -90,11 +90,6 @@ int pesquisaValor(ABP* raiz, int valor) {
   return pesquisaRec(raiz, valor);
 }
 
-int removeValor(ABP* raiz, int valor) {
-  if(pesquisaValor(raiz, valor) == 0) return 0;
-  return removeRec(raiz, valor);
-}
-
 int removeRec(NO** raiz, int valor) {
   if(*raiz == NULL) return 0;
   if((*raiz)->info == valor) {
@@ -125,6 +120,11 @@ int removeRec(NO** raiz, int valor) {
   } else {
     return removeRec(&(*raiz)->dir, valor);
   }
+}
+
+int removeValor(ABP* raiz, int valor) {
+  if(pesquisaValor(raiz, valor) == 0) return 0;
+  return removeRec(raiz, valor);
 }
 
 void em_ordem(NO *raiz, int nivel) {
