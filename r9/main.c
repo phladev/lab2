@@ -32,11 +32,7 @@ int main() {
         int valor;
         printf("Digite o valor a ser inserido: ");
         scanf("%d", &valor);
-        if(insereValor(raiz, valor)) {
-          printf("Valor %d inserido com sucesso!\n", valor);
-        } else {
-          printf("Erro ao inserir o valor %d.\n", valor);
-        }
+        insereValor(raiz, valor);
         break;
       }
       case 3: {
@@ -54,11 +50,7 @@ int main() {
         int valor;
         printf("Digite o valor a ser removido: ");
         scanf("%d", &valor);
-        if(removeValor(raiz, valor)) {
-          printf("Valor %d removido com sucesso!\n", valor);
-        } else {
-          printf("Erro ao remover o valor %d.\n", valor);
-        }
+        removeValor(raiz, valor);
         break;
       }
       case 5:
@@ -79,4 +71,6 @@ int main() {
     }
    
   } while(opcao != 8);
+
+  return 0;
 }
